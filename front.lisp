@@ -1,7 +1,7 @@
 (in-package #:displayer)
 
 (define-page front "/" ()
-  (r-clip:with-clip-processing ("front.ctml" "text/html; charset=utf-8")
+  (r-clip:with-clip-processing ((template-file "front.ctml" #.*package*) "text/html; charset=utf-8")
     (r-clip:process T
                     :message (post/get "message")
                     :error (post/get "error")
