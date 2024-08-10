@@ -1,0 +1,78 @@
+<!doctype HTML>
+<html>
+  <head>
+    <title>Displayer</title>
+    <link rel="stylesheet" @href="/static/displayer/front.css"/>
+  </head>
+  <body>
+    <header>
+      <h1>Displayer</h1>
+      <span>MPV: <a @href="/api/displayer/mpv/restart?browser=true">
+        <c:if test="mpv"><c:then>Running</c:then><c:else>Stopped</c:else></c:if>
+      </a></span>
+      <span>Tasks: <a @href="/api/displayer/task/restart?browser=true">
+        <c:if test="runner"><c:then>Running</c:then><c:else>Stopped</c:else></c:if>
+      </a></span>
+    </header>
+    <c:when test="message">
+      <div class="message box"><c:s>message</c:s></div>
+    </c:when>
+    <c:when test="error">
+      <div class="error box"><c:s>error</c:s></div>
+    </c:when>
+    <section id="videos">
+      <nav>
+        <form @action="/api/displayer/video/upload" method="post" enctype="multipart/form-data">
+          <input type="text" name="name" placeholder="Name ..." />
+          <input type="file" name="file" required />
+          <input type="hidden" name="browser" value="true" />
+          <input type="submit" value="Upload" />
+        </form>
+        <form @action="/api/displayer/video/download" method="post" enctype="multipart/form-data">
+          <input type="text" name="name" required placeholder="Name ..." />
+          <input type="url" name="url" required  placeholder="http://youtube.com ..." />
+          <input type="hidden" name="browser" value="true" />
+          <input type="submit" value="Download" />
+        </form>
+      </nav>
+      <ul iterate="videos">
+        <li class="video">
+          <a lquery="(attr :href (clip * :file))"><img lquery="(attr :src (clip * :thumbnail))"/></a>
+          <span class="name" lquery="(text (clip * :name))">NAME</span>
+          <span class="size" lquery="(text (clip * :size))">SIZE</span>
+          <span class="length" lquery="(text (clip * :length))">LENGTH</span>
+          <nav>
+            <form @action="/api/displayer/video/delete">
+              <input type="hidden" name="name" lquery="(val (clip * :name))" />
+              <input type="hidden" name="browser" value="true" />
+              <input type="submit" value="Delete" />
+            </form>
+          </nav>
+        </li>
+      </ul>
+    </section>
+    <section id="tasks">
+      <nav>
+        <form @action="/api/displayer/task/clear">
+          <input type="hidden" name="browser" value="true" />
+          <input type="submit" value="Clear All" />
+        </form>
+      </nav>
+      <ul iterate="tasks">
+        <li class="task">
+          <span class="type" lquery="(text (type-of *))">TYPE</span>
+          <span class="descriptor" lquery="(text (displayer::descriptor *))">DESCRIPTOR</span>
+          <span class="status" lquery="(text status)">STATUS</span>
+          <time class="time" lquery="(time created-at)"></time>
+          <nav>
+            <form @action="/api/displayer/task/clear">
+              <input type="hidden" name="id" lqury="(val id)" />
+              <input type="hidden" name="browser" value="true" />
+              <input type="submit" value="Clear" />
+            </form>
+          </nav>
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

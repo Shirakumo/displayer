@@ -12,6 +12,7 @@
   :serial T
   :components ((:file "module")
                (:file "toolkit")
+               (:file "task")
                (:file "api")
                (:file "front"))
   :depends-on (:bordeaux-threads

@@ -19,7 +19,7 @@
 
 (defun make-thumbnail (input output &key (w 1920/4) (h 1080/4))
   (run "ffmpeg" "-hide_banner" "-loglevel" "error"
-       "-i" input
+       "-y" "-i" input
        "-ss" "00:00:01.000"
        "-vf" (format NIL "scale=~a:~a:force_original_aspect_ratio=decrease" w h)
        "-vframes" "1"
@@ -35,31 +35,68 @@
        "--skip-download"
        "-o" output))
 
-(defun video-file (name)
-  (radiance:environment-module-pathname #.*package* :data (make-pathname :name (string-downcase name) :type "mp4")))
+(defun probe-length (input)
+  (read-from-string
+   (run "ffprobe" "-hide_banner" "-loglevel" "error"
+        "-select_streams" "v:0"
+        "-show_entries"
+        "stream=duration"
+        "-of" "default=noprint_wrappers=1:nokey=1"
+        input)))
 
 (defun list-videos ()
   (directory (radiance:environment-module-pathname #.*package* :data (make-pathname :name :wild :type "mp4"))))
 
+(defun video-file (name)
+  (if (pathnamep name)
+      name
+      (radiance:environment-module-pathname #.*package* :data (make-pathname :name (string-downcase name) :type "mp4"))))
+
 (defun video-thumbnail (input)
   (if (pathnamep input)
       (video-thumbnail (pathname-name input))
-      (radiance:environment-module-pathname #.*package* :data (make-pathname :name (string-downcase input) :type "mp4"))))
+      (radiance:environment-module-pathname #.*package* :cache (make-pathname :name (string-downcase input) :type "png"))))
+
+(defun video-length (input)
+  (probe-length input))
 
 (defun video-name (input)
   (pathname-name input))
 
-(defun copy-video (input name)
-  (let ((output (video-file name))
-        (thumbnail (video-thumnbail output)))
+(defun video-data (input)
+  (let* ((file (probe-file (video-file input)))
+         (name (video-name file)))
+    (if file
+        (mktab :name name
+               :file (uri-to-url "/api/displayer/video/file"
+                                 :representation :external
+                                 :query `(("name" . ,name)))
+               :thumbnail (uri-to-url "/api/displayer/video/thumbnail"
+                                      :representation :external
+                                      :query `(("name" . ,name)))
+               :length (video-length file)
+               :size (file-size file))
+        (error "No such video ~a" input))))
+
+(defun copy-video (input &optional (name (pathname-name input)))
+  (let* ((output (video-file name))
+         (thumbnail (video-thumbnail output)))
     (etypecase input
       (string
        (download-video input output)
        (download-thumbnail input thumbnail))
       (pathname
-       (uiop:copy-file input output)
+       (unless (equal input output)
+         (uiop:copy-file input output)
+         (uiop:delete-file-if-exists input))
        (make-thumbnail input thumbnail)))
     output))
+
+(define-trigger startup ()
+  (ensure-directories-exist
+   (radiance:environment-module-directory #.*package* :data))
+  (ensure-directories-exist
+   (radiance:environment-module-directory #.*package* :cache)))
 
 (defun playlist ()
   (radiance:environment-module-pathname #.*package* :data "playlist.m3u"))

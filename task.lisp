@@ -20,15 +20,20 @@
   (restart-mpv-process)
   (restart-task-runner))
 
+(defun tasks-running-p ()
+  (and *task-runner* (bt:thread-alive-p *task-runner*)))
+
 (defun restart-task-runner ()
   (when *task-runner*
     (when (bt:thread-alive-p *task-runner*)
-      (make-instance 'stop-task-runner)
-      (loop repeat 10
-            do (unless (bt:thread-alive-p *task-runner*)
-                 (return))
-               (sleep 0.01)
-            finally (bt:destroy-thread *task-runner*)))
+      (let ((stop (make-instance 'stop-task-runner)))
+        (unwind-protect
+             (loop repeat 10
+                   do (unless (bt:thread-alive-p *task-runner*)
+                        (return))
+                      (sleep 0.01)
+                   finally (bt:destroy-thread *task-runner*))
+          (clear stop))))
     (setf *task-runner* NIL))
   (setf *task-runner* (bt:make-thread #'run-tasks :name "displayer task runner")))
 
@@ -38,10 +43,12 @@
                               (loop for task being the hash-values of *tasks*
                                     when (eql :pending (status task))
                                     collect task))
-                do (when (eql :pending task)
-                     (with-simple-restart (abort "Abort the task")
-                       (handler-bind ((error #'abort))
-                         (execute task)))))
+                do (with-simple-restart (abort "Abort the task")
+                     (handler-bind ((error (lambda (e)
+                                             (l:debug :displayer e)
+                                             (l:error :displayer "Task ~a failed: ~a" task e)
+                                             (abort e))))
+                       (execute task))))
           (bt:with-lock-held (*task-lock*)
             (bt:condition-wait *task-condition* *task-lock* :timeout 5)))))
 
@@ -50,8 +57,9 @@
     (gethash id *tasks*)))
 
 (defun list-tasks ()
-  (bt:with-lock-held (*task-lock*)
-    (alexandria:hash-table-values *tasks*)))
+  (sort (bt:with-lock-held (*task-lock*)
+          (alexandria:hash-table-values *tasks*))
+        #'> :key #'created-at))
 
 (defmethod clear ((task task))
   (bt:with-lock-held (*task-lock*)
@@ -63,6 +71,7 @@
 
 (defclass task ()
   ((id :initarg :id :initform (make-random-string) :accessor id)
+   (created-at :initarg :created-at :initform (get-universal-time) :accessor created-at)
    (status :initform :pending :accessor status)
    (message :initform NIL :accessor message)))
 
@@ -71,9 +80,14 @@
     (setf (gethash (id task) *tasks*) task))
   (bt:condition-notify *task-condition*))
 
+(defmethod print-object ((task task) stream)
+  (print-unreadable-object (task stream :type T)
+    (format stream "~a ~a" (id task) (status task))))
+
 (defgeneric execute (task))
 
 (defmethod execute :around ((task task))
+  (l:info :displayer "Running ~a" task)
   (setf (status task) :running)
   (handler-bind ((error (lambda (e)
                           (setf (message task) (princ-to-string e))
@@ -81,9 +95,11 @@
     (prog1 (call-next-method)
       (setf (status task) :finished))))
 
+(defmethod descriptor ((task task)) "")
+
 (defclass add-video (task)
   ((input :initarg :input :accessor input)
-   (name :initarg :name :accessor name)))
+   (name :initarg :name :accessor name :reader descriptor)))
 
 (defmethod execute ((task add-video))
   (copy-video (input task) (name task))
@@ -91,7 +107,7 @@
   (restart-mpv-process))
 
 (defclass delete-video (task)
-  ((name :initarg :name :accessor name)))
+  ((name :initarg :name :accessor name :reader descriptor)))
 
 (defmethod execute ((task delete-video))
   (uiop:delete-file-if-exists (video-thumbnail (video-file (name task))))
