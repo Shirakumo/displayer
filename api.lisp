@@ -59,12 +59,23 @@
                                    :message (message task)))))
 
 (define-api displayer/task/clear (&optional id) ()
-  (clear (if id
-             (or (find-task id)
-                 (error 'api-argument-invalid :argument 'id))
-             T))
-  (output T "Task cleared"))
+  (cond (id
+         (let ((task (find-task id)))
+           (if task
+               (clear task)
+               (error 'api-argument-invalid :argument 'id))
+           (output T "Task cleared")))
+        (T
+         (clear T)
+         (output T "All tasks cleared"))))
 
-(define-api displayer/task/restart () ()
-  (restart-task-runner)
-  (output T "Task runner restarted"))
+(define-api displayer/task/restart (&optional id) ()
+  (cond (id
+         (let ((task (find-task id)))
+           (if task
+               (setf (status task) :pending)
+               (error 'api-argument-invalid :argument 'id))
+           (output T "Task restarted")))
+        (T
+         (restart-task-runner)
+         (output T "Task runner restarted"))))

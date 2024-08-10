@@ -66,10 +66,11 @@
           <span class="status" lquery="(text status)">STATUS</span>
           <time class="time" lquery="(time created-at)"></time>
           <nav>
-            <form @action="/api/displayer/task/clear">
+            <form>
               <input type="hidden" name="id" lqury="(val id)" />
               <input type="hidden" name="browser" value="true" />
-              <input type="submit" value="Clear" />
+              <input type="submit" @formaction="/api/displayer/task/restart" value="Restart" />
+              <input type="submit" @formaction="/api/displayer/task/clear" value="Clear" />
             </form>
           </nav>
         </li>
