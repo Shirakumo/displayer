@@ -18,4 +18,7 @@
   :depends-on (:bordeaux-threads
                :r-clip
                :i-json
-               :uiop))
+               :uiop)
+  :in-order-to ((asdf:build-op
+                 (asdf:load-op :displayer)
+                 (asdf:build-op :radiance))))
