@@ -61,10 +61,6 @@
           (alexandria:hash-table-values *tasks*))
         #'> :key #'created-at))
 
-(defmethod clear ((task task))
-  (bt:with-lock-held (*task-lock*)
-    (remhash (id task) *tasks*)))
-
 (defmethod clear ((all (eql T)))
   (bt:with-lock-held (*task-lock*)
     (clrhash *tasks*)))
@@ -96,6 +92,10 @@
       (setf (status task) :finished))))
 
 (defmethod descriptor ((task task)) "")
+
+(defmethod clear ((task task))
+  (bt:with-lock-held (*task-lock*)
+    (remhash (id task) *tasks*)))
 
 (defclass add-video (task)
   ((input :initarg :input :accessor input)
