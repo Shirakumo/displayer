@@ -12,10 +12,18 @@
         (error 'api-argument-invalid :argument 'name))))
 
 (define-api displayer/video/file (name) ()
-  (serve-file (video-file name)))
+  (let ((file (probe-file (video-file name))))
+    (cond (file
+           (setf (header "Content-Disposition") (format NIL "attachment; filename=~s" (file-namestring file)))
+           (serve-file file))
+          (T
+           (error 'api-argument-invalid :argument 'name)))))
 
 (define-api displayer/video/thumbnail (name) ()
-  (serve-file (video-thumbnail name)))
+  (let ((file (probe-file (video-thumbnail name))))
+    (if file
+        (serve-file file)
+        (error 'api-argument-invalid :argument 'name))))
 
 (define-api displayer/video/list () ()
   (api-output (mapcar #'video-data (list-videos))))
