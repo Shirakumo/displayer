@@ -37,10 +37,11 @@
       </nav>
       <ul iterate="videos">
         <li class="video">
-          <a lquery="(attr :href (clip * :file))"><img lquery="(attr :src (clip * :thumbnail))"/></a>
-          <span class="name" lquery="(text (clip * :name))">NAME</span>
-          <span class="size" lquery="(text (clip * :size))">SIZE</span>
-          <span class="length" lquery="(text (clip * :length))">LENGTH</span>
+          <a lquery="(attr :href (clip * :file))">
+            <img lquery="(attr :src (clip * :thumbnail))"/>
+            <span class="name" lquery="(text (clip * :name))">NAME</span>
+            <span class="length" lquery="(text (displayer::format-duration (clip * :length)))">LENGTH</span>
+          </a>
           <nav>
             <form @action="/api/displayer/video/delete">
               <input type="hidden" name="name" lquery="(val (clip * :name))" />

@@ -55,7 +55,28 @@
 ("#videos"
  (ul
   :display flex
-  :flex-wrap wrap))
+  :flex-wrap wrap
+  (li
+   :position relative
+   (nav
+    :position absolute
+    :bottom 0 :left 0))))
+
+(.video
+ (a
+  :position relative
+  :display flex
+  (img
+   :width 240px :height 135px)
+  ((:or .name .length)
+   :position absolute
+   :background (rgba 0 0 0 0.5)
+   :color white
+   :font-family monospace
+   :font-size 0.8em
+   :padding 0 0.2em)
+  (.name :top 0 :left 0)
+  (.length :right 0 :bottom 0)))
 
 ("#tasks"
  (ul

@@ -27,13 +27,15 @@
 
 (defun download-video (url output)
   (run "yt-dlp" url
+       "-S" "ext"
        "-o" output))
 
 (defun download-thumbnail (url output)
   (run "yt-dlp" url
-       "--write-thumbnail"
        "--skip-download"
-       "-o" output))
+       "--write-thumbnail"
+       "--convert-thumbnails" "png"
+       "-o" (make-pathname :type NIL :defaults output)))
 
 (defun probe-length (input)
   (read-from-string
@@ -103,7 +105,7 @@
 
 (defun make-playlist (&optional (videos (list-videos)))
   (with-open-file (stream (playlist) :direction :output :if-exists :supersede)
-    (dolist (video videos)
+    (dolist (video videos videos)
       (format stream "~&~a~%" (uiop:native-namestring video)))))
 
 (defun mktab (&rest keys)
@@ -111,3 +113,8 @@
     (loop for (k v) on keys by #'cddr
           do (setf (gethash k table) v))
     table))
+
+(defun format-duration (secs)
+  (format NIL "~2,'0d:~2,'0d"
+          (truncate secs 60)
+          (mod (round secs) 60)))
