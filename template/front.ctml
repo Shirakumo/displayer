@@ -62,6 +62,7 @@
       <ul iterate="tasks">
         <li class="task">
           <span class="type" lquery="(text (type-of *))">TYPE</span>
+          <a class="id" @href="/api/displayer/task?id={0} id" lquery="(text id)">ID</a>
           <span class="descriptor" lquery="(text (displayer::descriptor *))">DESCRIPTOR</span>
           <span class="status" lquery="(text status)">STATUS</span>
           <time class="time" lquery="(time created-at)"></time>
