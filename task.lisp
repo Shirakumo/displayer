@@ -86,6 +86,8 @@
   (l:info :displayer "Running ~a" task)
   (setf (status task) :running)
   (handler-bind ((error (lambda (e)
+                          (l:info :displayer e)
+                          (l:error :displayer "Task ~a failed: ~a" task e)
                           (setf (message task) (princ-to-string e))
                           (setf (status task) :failed))))
     (prog1 (call-next-method)
