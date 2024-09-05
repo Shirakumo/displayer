@@ -112,8 +112,7 @@
   ((name :initarg :name :accessor name :reader descriptor)))
 
 (defmethod execute ((task delete-video))
-  (uiop:delete-file-if-exists (video-thumbnail (video-file (name task))))
-  (uiop:delete-file-if-exists (video-file (name task)))
+  (delete-video (name task))
   (make-playlist)
   (restart-mpv-process))
 
