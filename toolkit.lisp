@@ -46,18 +46,21 @@
         "-of" "default=noprint_wrappers=1:nokey=1"
         input)))
 
+(defun vpath (kind name type)
+  (radiance:environment-module-pathname #.*package* kind (make-pathname :name name :type type)))
+
 (defun list-videos ()
-  (directory (radiance:environment-module-pathname #.*package* :data (make-pathname :name :wild :type "mp4"))))
+  (directory (vpath :data :wild "mp4")))
 
 (defun video-file (name)
   (if (pathnamep name)
       name
-      (radiance:environment-module-pathname #.*package* :data (make-pathname :name (string-downcase name) :type "mp4"))))
+      (vpath :data (string-downcase name) "mp4")))
 
 (defun video-thumbnail (input)
   (if (pathnamep input)
       (video-thumbnail (pathname-name input))
-      (let ((path (radiance:environment-module-pathname #.*package* :cache (make-pathname :name (string-downcase input) :type "png"))))
+      (let ((path (vpath :cache (string-downcase input) "png")))
         (unless (probe-file path)
           (make-thumbnail (video-file input) path))
         path)))
@@ -65,9 +68,9 @@
 (defun video-length (input)
   (if (pathnamep input)
       (video-length (pathname-name input))
-      (let ((path (radiance:environment-module-pathname #.*package* :cache (make-pathname :name (string-downcase input) :type "txt"))))
+      (let ((path (vpath :cache (string-downcase input) "txt")))
         (unless (probe-file path)
-          (with-open-file (stream path :direction :output)
+          (with-open-file (stream vpath :direction :output)
             (prin1 (probe-length (video-file input)) stream)))
         (with-open-file (stream path)
           (read stream)))))
@@ -91,10 +94,10 @@
         (error "No such video ~a" input))))
 
 (defun delete-video (input)
-  (let ((name (string-downcase) (if (pathnamep input) (pathname-name input) input)))
-    (uiop:delete-file-if-exists (radiance:environment-module-pathname #.*package* :cache (make-pathname :name name :type "txt")))
-    (uiop:delete-file-if-exists (radiance:environment-module-pathname #.*package* :cache (make-pathname :name name :type "png")))
-    (uiop:delete-file-if-exists (radiance:environment-module-pathname #.*package* :data (make-pathname :name name :type "mp4")))
+  (let ((name (string-downcase (if (pathnamep input) (pathname-name input) input))))
+    (uiop:delete-file-if-exists (vpath :cache (string-downcase name) "txt"))
+    (uiop:delete-file-if-exists (vpath :cache (string-downcase name) "png"))
+    (uiop:delete-file-if-exists (vpath :data (string-downcase name) "mp4"))
     name))
 
 (defun copy-video (input &optional (name (pathname-name input)))
@@ -118,7 +121,7 @@
    (radiance:environment-module-directory #.*package* :cache)))
 
 (defun playlist ()
-  (radiance:environment-module-pathname #.*package* :data "playlist.m3u"))
+  (vpath :data "playlist" "m3u"))
 
 (defun make-playlist (&optional (videos (list-videos)))
   (with-open-file (stream (playlist) :direction :output :if-exists :supersede)
