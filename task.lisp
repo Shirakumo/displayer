@@ -1,23 +1,23 @@
 (in-package #:displayer)
 
-(defvar *mpv-process* NIL)
+(defvar *video-process* NIL)
 (defvar *task-runner* NIL)
 (defvar *task-condition* (bt:make-condition-variable :name "task runner condition"))
 (defvar *task-lock* (bt:make-lock "task runner lock"))
 (defvar *tasks* (make-hash-table :test 'equal))
 
-(defun restart-mpv-process ()
-  (when *mpv-process*
-    (when (uiop:process-alive-p *mpv-process*)
-      (uiop:terminate-process *mpv-process*))
-    (setf *mpv-process* NIL))
-  (setf *mpv-process* (uiop:launch-program (list "mpv" "--shuffle" "--loop-playlist=inf" (uiop:native-namestring (playlist))))))
+(defun restart-video-process ()
+  (when *video-process*
+    (when (uiop:process-alive-p *video-process*)
+      (uiop:terminate-process *video-process*))
+    (setf *video-process* NIL))
+  (setf *video-process* (uiop:launch-program (list "video" "--shuffle" "--loop-playlist=inf" (uiop:native-namestring (playlist))))))
 
-(defun mpv-running-p ()
-  (and *mpv-process* (uiop:process-alive-p *mpv-process*)))
+(defun video-running-p ()
+  (and *video-process* (uiop:process-alive-p *video-process*)))
 
 (define-trigger radiance:startup-done ()
-  (restart-mpv-process)
+  (restart-video-process)
   (restart-task-runner))
 
 (defun tasks-running-p ()
@@ -106,7 +106,7 @@
 (defmethod execute ((task add-video))
   (copy-video (input task) (name task))
   (make-playlist)
-  (restart-mpv-process))
+  (restart-video-process))
 
 (defclass delete-video (task)
   ((name :initarg :name :accessor name :reader descriptor)))
@@ -114,13 +114,13 @@
 (defmethod execute ((task delete-video))
   (delete-video (name task))
   (make-playlist)
-  (restart-mpv-process))
+  (restart-video-process))
 
-(defclass restart-mpv (task)
+(defclass restart-video (task)
   ())
 
-(defmethod execute ((task restart-mpv))
-  (restart-mpv-process))
+(defmethod execute ((task restart-video))
+  (restart-video-process))
 
 (defclass stop-task-runner (task)
   ())

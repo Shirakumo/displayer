@@ -7,8 +7,8 @@
   <body>
     <header>
       <h1>Displayer</h1>
-      <span>MPV: <a @href="/api/displayer/mpv/restart?browser=true">
-        <c:if test="mpv"><c:then>Running</c:then><c:else>Stopped</c:else></c:if>
+      <span>Video: <a @href="/api/displayer/video/restart?browser=true">
+        <c:if test="video"><c:then>Running</c:then><c:else>Stopped</c:else></c:if>
       </a></span>
       <span>Tasks: <a @href="/api/displayer/task/restart?browser=true">
         <c:if test="runner"><c:then>Running</c:then><c:else>Stopped</c:else></c:if>
