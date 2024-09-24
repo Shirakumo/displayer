@@ -12,10 +12,12 @@
   :serial T
   :components ((:file "module")
                (:file "toolkit")
+               (:file "playback")
                (:file "task")
                (:file "api")
                (:file "front"))
   :depends-on (:bordeaux-threads
+               :telnetlib
                :r-clip
                :i-json
                :uiop)

@@ -70,7 +70,7 @@
       (video-length (pathname-name input))
       (let ((path (vpath :cache (string-downcase input) "txt")))
         (unless (probe-file path)
-          (with-open-file (stream vpath :direction :output)
+          (with-open-file (stream path :direction :output)
             (prin1 (probe-length (video-file input)) stream)))
         (with-open-file (stream path)
           (read stream)))))
@@ -119,14 +119,6 @@
    (radiance:environment-module-directory #.*package* :data))
   (ensure-directories-exist
    (radiance:environment-module-directory #.*package* :cache)))
-
-(defun playlist ()
-  (vpath :data "playlist" "m3u"))
-
-(defun make-playlist (&optional (videos (list-videos)))
-  (with-open-file (stream (playlist) :direction :output :if-exists :supersede)
-    (dolist (video videos videos)
-      (format stream "~&~a~%" (uiop:native-namestring video)))))
 
 (defun mktab (&rest keys)
   (let ((table (make-hash-table :test 'eql)))
