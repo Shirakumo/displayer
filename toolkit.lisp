@@ -18,6 +18,7 @@
         (error "~a" (get-output-stream-string out)))))
 
 (defun make-thumbnail (input output &key (w 1920/4) (h 1080/4))
+  (ensure-directories-exist output)
   (run "ffmpeg" "-hide_banner" "-loglevel" "error"
        "-y" "-i" input
        "-ss" "00:00:01.000"
@@ -26,11 +27,13 @@
        output))
 
 (defun download-video (url output)
+  (ensure-directories-exist output)
   (run "yt-dlp" url
        "-S" "ext"
        "-o" output))
 
 (defun download-thumbnail (url output)
+  (ensure-directories-exist output)
   (run "yt-dlp" url
        "--skip-download"
        "--write-thumbnail"
