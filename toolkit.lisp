@@ -115,6 +115,7 @@
          (uiop:copy-file input output)
          (uiop:delete-file-if-exists input))
        (make-thumbnail input thumbnail)))
+    (video-length output)
     output))
 
 (define-trigger startup ()
