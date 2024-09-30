@@ -22,6 +22,7 @@
       (format stream "~&~a~%" (uiop:native-namestring video)))))
 
 (defun restart-playlist ()
+  (make-playlist)
   (send-command "clear" (format NIL "enqueue ~a" (namestring (playlist))) "loop on" "random on" "play"))
 
 (defun remove-from-playlist (video)
