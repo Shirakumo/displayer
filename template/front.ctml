@@ -7,7 +7,7 @@
   <body>
     <header>
       <h1>Displayer</h1>
-      <span>Video: <a @href="/api/displayer/video/restart?browser=true">
+      <span>Video: <a @href="/api/displayer/playback/restart?browser=true">
         <c:if test="video"><c:then>Running</c:then><c:else>Stopped</c:else></c:if>
       </a></span>
       <span>Tasks: <a @href="/api/displayer/task/restart?browser=true">

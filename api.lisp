@@ -43,12 +43,12 @@
   (let ((task (make-instance 'delete-video :name name)))
     (output (id task) "Delete queued")))
 
-(define-api displayer/mpv () ()
-  (api-output (mktab :status (if (mpv-running-p) "running" "stopped"))))
+(define-api displayer/playback () ()
+  (api-output (mktab :status (if (video-running-p) "running" "stopped"))))
 
-(define-api displayer/mpv/restart () ()
-  (let ((task (make-instance 'restart-mpv)))
-    (output (id task) "MPV restart queued")))
+(define-api displayer/playback/restart () ()
+  (let ((task (make-instance 'restart-video)))
+    (output (id task) "Restart queued")))
 
 (define-api displayer/task (id) ()
   (let ((task (find-task id)))
