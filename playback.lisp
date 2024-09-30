@@ -3,7 +3,10 @@
 (defun send-command (&rest commands)
   (telnetlib:with-telnet-session (tn (defaulted-config "localhost" :vlc-host)
                                      (defaulted-config 4212 :vlc-port))
+    (telnetlib:set-telnet-session-option tn :char-callback (constantly NIL))
     (telnetlib:write-ln tn (defaulted-config "vlc" :vlc-pass))
+    (let ((read (telnetlib:read-until-2 tn '("Wrong" ">") :timeout 0.1)))
+      (when (search "Wrong" read) (error "Invalid password.")))
     (dolist (command commands)
       (telnetlib:write-ln tn command))))
 
