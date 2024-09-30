@@ -60,11 +60,11 @@
       name
       (vpath :data (string-downcase name) "mp4")))
 
-(defun video-thumbnail (input)
+(defun video-thumbnail (input &rest args &key (create T))
   (if (pathnamep input)
-      (video-thumbnail (pathname-name input))
+      (apply #'video-thumbnail (pathname-name input) args)
       (let ((path (vpath :cache (string-downcase input) "png")))
-        (unless (probe-file path)
+        (when (and create (not (probe-file path)))
           (make-thumbnail (video-file input) path))
         path)))
 
@@ -105,7 +105,7 @@
 
 (defun copy-video (input &optional (name (pathname-name input)))
   (let* ((output (video-file name))
-         (thumbnail (video-thumbnail output)))
+         (thumbnail (video-thumbnail output :create NIL)))
     (etypecase input
       (string
        (download-video input output)
