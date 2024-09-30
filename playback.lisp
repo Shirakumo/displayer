@@ -1,12 +1,9 @@
 (in-package #:displayer)
 
-(defvar *vlc-host* "localhost")
-(defvar *vlc-port* 4212)
-(defvar *vlc-pass* "vlc")
-
 (defun send-command (&rest commands)
-  (telnetlib:with-telnet-session (tn *vlc-host* *vlc-port*)
-    (telnetlib:write-ln tn *vlc-pass*)
+  (telnetlib:with-telnet-session (tn (defaulted-config "localhost" :vlc-host)
+                                     (defaulted-config 4212 :vlc-port))
+    (telnetlib:write-ln tn (defaulted-config "vlc" :vlc-pass))
     (dolist (command commands)
       (telnetlib:write-ln tn command))))
 
