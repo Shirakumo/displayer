@@ -29,7 +29,8 @@
 (defun download-video (url output)
   (ensure-directories-exist output)
   (run "yt-dlp" url
-       "-S" "ext"
+       "-S" "vcodec:h264"
+       "-f" "bv[height<=1080]+ba/b[height<=1080]"
        "-o" output))
 
 (defun download-thumbnail (url output)
