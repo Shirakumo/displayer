@@ -13,6 +13,7 @@
       <span>Tasks: <a @href="/api/displayer/task/restart?browser=true">
         <c:if test="runner"><c:then>Running</c:then><c:else>Stopped</c:else></c:if>
       </a></span>
+      <span>Uptime: <s>(format-relative-time (org.shirakumo.machine-state:machine-uptime))</s></span>
     </header>
     <c:when test="message">
       <div class="message box"><c:s>message</c:s></div>

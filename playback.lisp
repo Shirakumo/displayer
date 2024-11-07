@@ -9,7 +9,7 @@
       (when (search "Wrong" read) (error "Invalid password.")))
     (dolist (command commands)
       (telnetlib:write-ln tn command)
-      (telnetlib:read-available-data tn))))
+      (telnetlib:read-available-data tn T))))
 
 (defun video-running-p ()
   (ignore-errors (send-command) T))

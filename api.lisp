@@ -40,11 +40,8 @@
     (output (id task) "Download started")))
 
 (define-api displayer/video/toggle (name) ()
-  (let ((enabled-p (video-enabled-p name)))
-    (if enabled-p
-        (disable-video name)
-        (enable-video name))
-    (output "" (if enabled-p "Video disabled" "Video enabled"))))
+  (let ((task (make-instance 'toggle-video :name name)))
+    (output (id task) (if (video-enabled-p name) "Video disabled" "Video enabled"))))
 
 (define-api displayer/video/delete (name) ()
   (let ((task (make-instance 'delete-video :name name)))

@@ -18,6 +18,7 @@
                (:file "front"))
   :depends-on (:bordeaux-threads
                :filesystem-utils
+               :machine-state
                :telnetlib
                :r-clip
                :i-json
