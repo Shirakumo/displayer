@@ -109,6 +109,12 @@
 (defmethod execute ((task restart-video))
   (restart-playlist))
 
+(defclass play-video (task)
+  ((name :initarg :name :accessor name :reader descriptor)))
+
+(defmethod execute ((task play-video))
+  (play-video (name task)))
+
 (defclass stop-task-runner (task)
   ())
 

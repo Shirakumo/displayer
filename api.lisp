@@ -39,9 +39,19 @@
   (let ((task (make-instance 'add-video :input url :name name)))
     (output (id task) "Download started")))
 
+(define-api displayer/video/edit (name &optional active-p) ()
+  (if active-p
+      (enable-video name)
+      (disable-video name))
+  (output "" "Video edited"))
+
 (define-api displayer/video/delete (name) ()
   (let ((task (make-instance 'delete-video :name name)))
     (output (id task) "Delete queued")))
+
+(define-api displayer/video/play (name) ()
+  (let ((task (make-instance 'play-video :name name)))
+    (output (id task) "Video playback queued")))
 
 (define-api displayer/playback () ()
   (api-output (mktab :status (if (video-running-p) "running" "stopped"))))

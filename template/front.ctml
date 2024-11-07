@@ -36,9 +36,9 @@
         </form>
       </nav>
       <ul iterate="videos">
-        <li class="video">
-          <a lquery="(attr :href (clip * :file))">
-            <img lquery="(attr :src (clip * :thumbnail))"/>
+        <li class="video" lquery="(add-class (if (displayer::video-enabled-p (clip * :name)) :enabled :disabled))">
+          <a @href="/api/displayer/video/play?name={0}&browser=true (clip * :name)">
+            <img lquery="(attr :src (clip * :thumbnail))">
             <span class="name" lquery="(text (clip * :name))">NAME</span>
             <span class="length" lquery="(text (displayer::format-duration (clip * :length)))">LENGTH</span>
           </a>

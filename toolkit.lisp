@@ -29,8 +29,10 @@
 (defun download-video (url output)
   (ensure-directories-exist output)
   (run "yt-dlp" url
-       "-S" "vcodec:h264"
+       "-S" "ext"
        "-f" "bv[height<=1080]+ba/b[height<=1080]"
+       "--use-postprocessor" "FFmpegCopyStream"
+       "--ppa" "CopyStream:-c:v libx264 -preset veryfast -c:a aac -f mp4"
        "-o" output))
 
 (defun download-thumbnail (url output)
@@ -50,16 +52,38 @@
         "-of" "default=noprint_wrappers=1:nokey=1"
         input)))
 
-(defun vpath (kind name type)
-  (radiance:environment-module-pathname #.*package* kind (make-pathname :name name :type type)))
+(defun vpath (kind name type &rest args)
+  (radiance:environment-module-pathname #.*package* kind (apply #'make-pathname :name name :type type args)))
 
 (defun list-videos ()
   (directory (vpath :data :wild "mp4")))
+
+(defun list-enabled-videos ()
+  (directory (vpath :data :wild "mp4" :directory '(:relative "enabled"))))
 
 (defun video-file (name)
   (if (pathnamep name)
       name
       (vpath :data (string-downcase name) "mp4")))
+
+(defun video-enabled-file (name)
+  (if (pathnamep name)
+      (video-enabled-file (pathname-name name))
+      (vpath :data (string-downcase name) "mp4" :directory '(:relative "enabled"))))
+
+(defun video-enabled-p (input)
+  (probe-file (video-enabled-file input)))
+
+(defun enable-video (input)
+  (let ((file (video-enabled-file input)))
+    (unless (probe-file file)
+      (org.shirakumo.filesystem-utils:create-symbolic-link
+       file (video-file input)))))
+
+(defun disable-video (input)
+  (let ((file (video-enabled-file input)))
+    (when (probe-file file)
+      (delete-file file))))
 
 (defun video-thumbnail (input &rest args &key (create T))
   (if (pathnamep input)
@@ -87,6 +111,7 @@
          (name (video-name file)))
     (if file
         (mktab :name name
+               :enabled (video-enabled-p file)
                :file (uri-to-url "/api/displayer/video/file"
                                  :representation :external
                                  :query `(("name" . ,name)))
@@ -102,6 +127,7 @@
     (uiop:delete-file-if-exists (vpath :cache (string-downcase name) "txt"))
     (uiop:delete-file-if-exists (vpath :cache (string-downcase name) "png"))
     (uiop:delete-file-if-exists (vpath :data (string-downcase name) "mp4"))
+    (uiop:delete-file-if-exists (vpath :data (string-downcase name) "mp4" :directory '(:relative "enabled")))
     name))
 
 (defun copy-video (input &optional (name (pathname-name input)))

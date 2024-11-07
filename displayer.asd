@@ -17,6 +17,7 @@
                (:file "api")
                (:file "front"))
   :depends-on (:bordeaux-threads
+               :filesystem-utils
                :telnetlib
                :r-clip
                :i-json
