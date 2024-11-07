@@ -78,6 +78,9 @@
   (.name :top 0 :left 0)
   (.length :right 0 :bottom 0)))
 
+(.video.disabled
+ (img :opacity 0.5))
+
 ("#tasks"
  (ul
   (li

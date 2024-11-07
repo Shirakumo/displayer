@@ -78,7 +78,8 @@
   (let ((file (video-enabled-file input)))
     (unless (probe-file file)
       (org.shirakumo.filesystem-utils:create-symbolic-link
-       file (video-file input)))))
+       (pathname-utils:native-namestring file)
+       (pathname-utils:native-namestring (video-file input))))))
 
 (defun disable-video (input)
   (let ((file (video-enabled-file input)))
@@ -148,6 +149,8 @@
 (define-trigger startup ()
   (ensure-directories-exist
    (radiance:environment-module-directory #.*package* :data))
+  (ensure-directories-exist
+   (radiance:environment-module-pathname #.*package* :data "enabled/"))
   (ensure-directories-exist
    (radiance:environment-module-directory #.*package* :cache)))
 
