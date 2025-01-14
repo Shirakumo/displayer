@@ -1,0 +1,2 @@
+## About Displayer
+This is a small webapp to manage an unattended display of videos. You'll need to set up an instance of VLC with the telnet interface to which Displayer will connect in order to queue up and run videos.
