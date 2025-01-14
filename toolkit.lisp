@@ -28,12 +28,14 @@
 
 (defun download-video (url output)
   (ensure-directories-exist output)
-  (run "yt-dlp" url
-       "-S" "ext"
-       "-f" "bv[height<=1080]+ba/b[height<=1080]"
-       "--use-postprocessor" "FFmpegCopyStream"
-       "--ppa" "CopyStream:-c:v libx264 -preset veryfast -c:a aac -f mp4"
-       "-o" output))
+  (let ((tmp (org.shirakumo.filesystem-utils:make-temporary-file :type (pathname-type output))))
+    (run "yt-dlp" url
+         "-S" "ext"
+         "-f" "bv[height<=1080]+ba/b[height<=1080]"
+         "--use-postprocessor" "FFmpegCopyStream"
+         "--ppa" "CopyStream:-c:v libx264 -preset veryfast -c:a aac -f mp4"
+         "-o" tmp)
+    (org.shirakumo.filesystem-utils:rename-file* tmp output)))
 
 (defun download-thumbnail (url output)
   (ensure-directories-exist output)
