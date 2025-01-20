@@ -115,19 +115,6 @@
 (defmethod execute ((task play-video))
   (play-video (name task)))
 
-(defclass toggle-video (task)
-  ((name :initarg :name :accessor name :reader descriptor)))
-
-(defmethod execute ((task toggle-video))
-  (let* ((name (name task))
-         (enabled-p (video-enabled-p name)))
-    (cond (enabled-p
-           (disable-video name)
-           (ignore-errors (remove-from-playlist (name task))))
-          (T
-           (enable-video name)
-           (ignore-errors (add-to-playlist (name task)))))))
-
 (defclass stop-task-runner (task)
   ())
 
