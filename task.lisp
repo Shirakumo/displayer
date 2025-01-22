@@ -6,7 +6,7 @@
 (defvar *tasks* (make-hash-table :test 'equal))
 
 (define-trigger radiance:startup-done ()
-  (ignore-errors (restart-playlist))
+  (make-instance 'restart-video)
   (restart-task-runner))
 
 (defun tasks-running-p ()
