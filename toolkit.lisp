@@ -96,15 +96,17 @@
           (make-thumbnail (video-file input) path))
         path)))
 
-(defun video-length (input)
+(defun video-length (input &key (create T))
   (if (pathnamep input)
       (video-length (pathname-name input))
       (let ((path (vpath :cache (string-downcase input) "txt")))
-        (unless (probe-file path)
+        (when (and create (null (probe-file path)))
           (with-open-file (stream path :direction :output)
             (prin1 (probe-length (video-file input)) stream)))
-        (with-open-file (stream path)
-          (read stream)))))
+        (with-open-file (stream path :if-does-not-exist NIL)
+          (if stream
+              (read stream)
+              0)))))
 
 (defun video-name (input)
   (pathname-name input))

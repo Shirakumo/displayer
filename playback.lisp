@@ -1,5 +1,7 @@
 (in-package #:displayer)
 
+(defvar *vlc-process* NIL)
+
 (defun send-command (&rest commands)
   (telnetlib:with-telnet-session (tn (defaulted-config "localhost" :vlc-host)
                                      (defaulted-config 4212 :vlc-port))
@@ -37,3 +39,17 @@
 (defun play-video (video)
   (send-command "stop" "clear" (format NIL "enqueue ~a" (namestring (video-file video))) "play"
                 (format NIL "enqueue ~a" (namestring (playlist))) "loop on" "random on"))
+
+(defun start-vlc ()
+  (when (or (null *vlc-process*) (uiop:process-alive-p *vlc-process*))
+    (setf *vlc-process* (uiop:launch-program (list "vlc"
+                                                   "--intf" "qt"
+                                                   "--extraintf" "telnet"
+                                                   "--telnet-password" (defaulted-config "vlc" :vlc-pass)
+                                                   (uiop:native-namestring (playlist))))))
+  *vlc-process*)
+
+(defun stop-vlc ()
+  (when (and *vlc-process* (uiop:process-alive-p *vlc-process*))
+    (uiop:terminate-process *vlc-process*)
+    (setf *vlc-process* NIL)))

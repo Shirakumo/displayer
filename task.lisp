@@ -107,6 +107,8 @@
   ())
 
 (defmethod execute ((task restart-video))
+  (unless (video-running-p)
+    (start-vlc))
   (restart-playlist))
 
 (defclass play-video (task)
