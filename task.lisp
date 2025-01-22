@@ -88,6 +88,13 @@
   (bt:with-lock-held (*task-lock*)
     (remhash (id task) *tasks*)))
 
+(defclass ensure-video (task)
+  ((name :initarg :name :accessor name :reader descriptor)))
+
+(defmethod execute ((task ensure-video))
+  (video-thumbnail (name task))
+  (video-length (name task)))
+
 (defclass add-video (task)
   ((input :initarg :input :accessor input)
    (name :initarg :name :accessor name :reader descriptor)))

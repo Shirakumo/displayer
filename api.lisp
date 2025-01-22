@@ -20,7 +20,9 @@
            (error 'api-argument-invalid :argument 'name)))))
 
 (define-api displayer/video/thumbnail (name) ()
-  (let ((file (probe-file (video-thumbnail name))))
+  (let ((file (probe-file (video-thumbnail name :create NIL))))
+    (unless file
+      (make-instance 'ensure-video :name name))
     (if file
         (serve-file file)
         (error 'api-argument-invalid :argument 'name))))

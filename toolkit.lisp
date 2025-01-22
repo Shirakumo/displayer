@@ -123,7 +123,7 @@
                :thumbnail (uri-to-url "/api/displayer/video/thumbnail"
                                       :representation :external
                                       :query `(("name" . ,name)))
-               :length (video-length file)
+               :length (video-length file :create NIL)
                :size (file-size file))
         (error "No such video ~a" input))))
 
