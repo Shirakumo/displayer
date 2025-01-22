@@ -46,6 +46,7 @@
                                                    "--intf" "qt"
                                                    "--extraintf" "telnet"
                                                    "--telnet-password" (defaulted-config "vlc" :vlc-pass)
+                                                   "--random" "--loop" "--fullscreen"
                                                    (uiop:native-namestring (playlist))))))
   *vlc-process*)
 
