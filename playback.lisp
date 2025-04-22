@@ -22,10 +22,12 @@
 (defun make-playlist (&optional (videos (list-enabled-videos)))
   (with-open-file (stream (playlist) :direction :output :if-exists :supersede)
     (dolist (video videos videos)
-      (format stream "~&~a~%" (uiop:native-namestring video)))))
+      (format stream "~&~a~%" (pathname-utils:native-namestring video)))))
 
 (defun restart-playlist ()
   (make-playlist)
+  (unless (video-running-p)
+    (start-vlc))
   (send-command "stop" "clear" (format NIL "enqueue ~a" (namestring (playlist))) "loop on" "random on" "play"))
 
 (defun remove-from-playlist (video)
@@ -42,12 +44,16 @@
 
 (defun start-vlc ()
   (when (or (null *vlc-process*) (uiop:process-alive-p *vlc-process*))
+    (unless (uiop:getenvp "DISPLAY")
+      (setf (uiop:getenv "DISPLAY") ":0.0"))
     (setf *vlc-process* (uiop:launch-program (list "vlc"
                                                    "--intf" "qt"
                                                    "--extraintf" "telnet"
                                                    "--telnet-password" (defaulted-config "vlc" :vlc-pass)
                                                    "--random" "--loop" "--fullscreen"
-                                                   (uiop:native-namestring (playlist))))))
+                                                   (pathname-utils:native-namestring (playlist)))
+                                             :output *standard-output*
+                                             :error-output *standard-output*)))
   *vlc-process*)
 
 (defun stop-vlc ()

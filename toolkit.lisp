@@ -5,7 +5,7 @@
            (etypecase arg
              (string arg)
              (real (princ-to-string arg))
-             (pathname (uiop:native-namestring arg)))))
+             (pathname (pathname-utils:native-namestring arg)))))
     (loop for arg in args
           append (if (listp arg) (mapcar #'frob arg) (list (frob arg))))))
 
@@ -32,8 +32,8 @@
     (run "yt-dlp" url
          "-S" "ext"
          "-f" "bv[height<=1080]+ba/b[height<=1080]"
-         "--use-postprocessor" "FFmpegCopyStream"
-         "--ppa" "CopyStream:-c:v libx264 -preset veryfast -c:a aac -f mp4"
+         ;;"--use-postprocessor" "FFmpegCopyStream"
+         ;;"--ppa" "CopyStream:-c:v libx264 -preset veryfast -c:a aac -f mp4"
          "-o" tmp)
     (org.shirakumo.filesystem-utils:rename-file* tmp output)))
 

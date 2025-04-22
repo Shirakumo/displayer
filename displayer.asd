@@ -17,6 +17,7 @@
                (:file "api")
                (:file "front"))
   :depends-on (:bordeaux-threads
+               :pathname-utils
                :filesystem-utils
                :machine-state
                :telnetlib

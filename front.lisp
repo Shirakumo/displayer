@@ -1,6 +1,6 @@
 (in-package #:displayer)
 
-(define-page front "/" ()
+(define-page front ("/^$" 100) ()
   (r-clip:with-clip-processing ((template-file "front.ctml" #.*package*) "text/html; charset=utf-8")
     (r-clip:process T
                     :message (post/get "message")
