@@ -1,20 +1,34 @@
 (in-package #:displayer)
 
-(defvar *vlc-process* NIL)
+(defvar *player* NIL)
 
-(defun send-command (&rest commands)
-  (telnetlib:with-telnet-session (tn (defaulted-config "localhost" :vlc-host)
-                                     (defaulted-config 4212 :vlc-port))
-    (telnetlib:set-telnet-session-option tn :char-callback (constantly NIL))
-    (telnetlib:write-ln tn (defaulted-config "vlc" :vlc-pass))
-    (let ((read (telnetlib:read-until-2 tn '("Wrong" ">") :timeout 0.1)))
-      (when (search "Wrong" read) (error "Invalid password.")))
-    (dolist (command commands)
-      (telnetlib:write-ln tn command)
-      (telnetlib:read-available-data tn T))))
+(defclass player ()
+  ((process :initform NIL :accessor process)))
 
-(defun video-running-p ()
-  (ignore-errors (send-command) T))
+(defgeneric running-p (impl))
+(defgeneric start (impl))
+(defgeneric stop (impl))
+(defgeneric play-video (video impl))
+(defgeneric remove-from-playlist (video impl))
+(defgeneric add-to-playlist (video impl))
+
+(defmethod running-p ((impl (eql T)))
+  (and *player* (running-p *player*)))
+
+(defmethod start ((impl (eql T)))
+  (start (or *player* (make-instance (defaulted-config 'mpv :player)))))
+
+(defmethod stop ((impl (eql T)))
+  (when *player* (stop *player*)))
+
+(defmethod play-video (video (impl (eql T)))
+  (play-video (or *player* (start impl))))
+
+(defmethod remove-from-playlist (video (impl (eql T)))
+  (remove-from-playlist video (or *player* (make-instance 'dummy))))
+
+(defmethod add-to-playlist (video (impl (eql T)))
+  (add-to-playlist video (or *player* (make-instance 'dummy))))
 
 (defun playlist ()
   (vpath :data "playlist" "m3u"))
@@ -24,39 +38,38 @@
     (dolist (video videos videos)
       (format stream "~&~a~%" (pathname-utils:native-namestring video)))))
 
-(defun restart-playlist ()
+(defun restart-playlist (&optional (impl T))
   (make-playlist)
-  (unless (video-running-p)
-    (start-vlc))
-  (send-command "stop" "clear" (format NIL "enqueue ~a" (namestring (playlist))) "loop on" "random on" "play"))
+  (when (running-p impl)
+    (stop impl))
+  (start impl))
 
-(defun remove-from-playlist (video)
-  (send-command (format NIL "del ~a" (namestring (video-file video))))
+(defmethod remove-from-playlist :before (video (impl player))
   (make-playlist))
 
-(defun add-to-playlist (video)
-  (send-command (format NIL "enqueue ~a" (namestring (video-file video))))
+(defmethod add-to-playlist :before (video (impl player))
   (make-playlist))
 
-(defun play-video (video)
-  (send-command "stop" "clear" (format NIL "enqueue ~a" (namestring (video-file video))) "play"
-                (format NIL "enqueue ~a" (namestring (playlist))) "loop on" "random on"))
+(defmethod running-p ((player player))
+  (and (process player)
+       (uiop:process-alive-p (process player))))
 
-(defun start-vlc ()
-  (when (or (null *vlc-process*) (uiop:process-alive-p *vlc-process*))
+(defmethod start :around ((player player))
+  (when (or (null (process player))
+            (not (uiop:process-alive-p (process player))))
     (unless (uiop:getenvp "DISPLAY")
       (setf (uiop:getenv "DISPLAY") ":0.0"))
-    (setf *vlc-process* (uiop:launch-program (list "vlc"
-                                                   "--intf" "qt"
-                                                   "--extraintf" "telnet"
-                                                   "--telnet-password" (defaulted-config "vlc" :vlc-pass)
-                                                   "--random" "--loop" "--fullscreen"
-                                                   (pathname-utils:native-namestring (playlist)))
-                                             :output *standard-output*
-                                             :error-output *standard-output*)))
-  *vlc-process*)
+    (setf (process player) (call-next-method)))
+  (setf *player* player))
 
-(defun stop-vlc ()
-  (when (and *vlc-process* (uiop:process-alive-p *vlc-process*))
-    (uiop:terminate-process *vlc-process*)
-    (setf *vlc-process* NIL)))
+(defmethod stop ((player player))
+  (when (and (process player) (uiop:process-alive-p (process player)))
+    (uiop:terminate-process (process player)))
+  (setf (process player) NIL)
+  player)
+
+(defclass dummy (player) ())
+
+(defmethod remove-from-playlist (video (player dummy)))
+(defmethod add-to-playlist (video (player dummy)))
+(defmethod start :around ((player dummy)) player)

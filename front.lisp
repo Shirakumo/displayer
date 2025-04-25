@@ -7,5 +7,5 @@
                     :error (post/get "error")
                     :videos (mapcar #'video-data (list-videos))
                     :tasks (list-tasks)
-                    :video (video-running-p)
+                    :video (running-p T)
                     :runner (tasks-running-p))))

@@ -44,11 +44,11 @@
 (define-api displayer/video/toggle (name) ()
   (let* ((enabled-p (video-enabled-p name)))
     (cond (enabled-p
-           (disable-video name)
-           (ignore-errors (remove-from-playlist name)))
+           (ignore-errors (remove-from-playlist name T))
+           (disable-video name))
           (T
            (enable-video name)
-           (ignore-errors (add-to-playlist name)))))
+           (ignore-errors (add-to-playlist name T)))))
   (output NIL (if (video-enabled-p name) "Video enabled" "Video disabled")))
 
 (define-api displayer/video/delete (name) ()
@@ -60,7 +60,7 @@
     (output (id task) "Video playback queued")))
 
 (define-api displayer/playback () ()
-  (api-output (mktab :status (if (video-running-p) "running" "stopped"))))
+  (api-output (mktab :status (if (running-p T) "running" "stopped"))))
 
 (define-api displayer/playback/restart () ()
   (let ((task (make-instance 'restart-video)))

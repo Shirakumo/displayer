@@ -101,29 +101,26 @@
 
 (defmethod execute ((task add-video))
   (copy-video (input task) (name task))
-  (ignore-errors (add-to-playlist (name task))))
+  (ignore-errors (add-to-playlist (name task) T)))
 
 (defclass delete-video (task)
   ((name :initarg :name :accessor name :reader descriptor)))
 
 (defmethod execute ((task delete-video))
-  (ignore-errors (remove-from-playlist (name task)))
+  (ignore-errors (remove-from-playlist (name task) T))
   (delete-video (name task)))
 
 (defclass restart-video (task)
   ())
 
 (defmethod execute ((task restart-video))
-  (unless (video-running-p)
-    (start-vlc)
-    (sleep 5))
   (restart-playlist))
 
 (defclass play-video (task)
   ((name :initarg :name :accessor name :reader descriptor)))
 
 (defmethod execute ((task play-video))
-  (play-video (name task)))
+  (play-video (name task) T))
 
 (defclass stop-task-runner (task)
   ())

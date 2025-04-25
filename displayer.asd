@@ -13,6 +13,8 @@
   :components ((:file "module")
                (:file "toolkit")
                (:file "playback")
+               (:file "vlc")
+               (:file "mpv")
                (:file "task")
                (:file "api")
                (:file "front"))
