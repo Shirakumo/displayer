@@ -156,8 +156,10 @@
   (ensure-directories-exist
    (radiance:environment-module-pathname #.*package* :data "enabled/"))
   (ensure-directories-exist
-   (radiance:environment-module-directory #.*package* :cache))
-  ())
+   (radiance:environment-module-directory #.*package* :cache)))
+
+(define-trigger shutdown ()
+  (stop T))
 
 (defun mktab (&rest keys)
   (let ((table (make-hash-table :test 'eql)))
