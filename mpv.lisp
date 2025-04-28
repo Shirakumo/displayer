@@ -19,8 +19,8 @@
 
 (defmethod start ((player mpv))
   (uiop:launch-program (list "mpv"
-                             (format NIL "--playlist=~a" (pathname-utils:native-namestring (playlist)))
-                             "--shuffle" "--loop-playlist" "--fullscreen"
+                             "--shuffle" (format NIL "--playlist=~a" (pathname-utils:native-namestring (playlist)))
+                             "--loop-playlist" "--fullscreen"
                              "--input-ipc-server=/tmp/mpvsocket")
                        :output *standard-output*
                        :error-output *standard-output*))
