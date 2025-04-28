@@ -156,7 +156,9 @@
   (ensure-directories-exist
    (radiance:environment-module-pathname #.*package* :data "enabled/"))
   (ensure-directories-exist
-   (radiance:environment-module-directory #.*package* :cache)))
+   (radiance:environment-module-directory #.*package* :cache))
+  (make-instance 'restart-video)
+  (restart-task-runner))
 
 (define-trigger shutdown ()
   (stop T))

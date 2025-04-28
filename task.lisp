@@ -5,10 +5,6 @@
 (defvar *task-lock* (bt:make-lock "task runner lock"))
 (defvar *tasks* (make-hash-table :test 'equal))
 
-(define-trigger radiance:startup-done ()
-  (make-instance 'restart-video)
-  (restart-task-runner))
-
 (defun tasks-running-p ()
   (and *task-runner* (bt:thread-alive-p *task-runner*)))
 
