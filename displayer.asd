@@ -6,9 +6,9 @@
   :version "0.0.0"
   :license "zlib"
   :description "An unattended display management tool"
-  :homepage "https://shirakumo.github.io/displayer/"
-  :bug-tracker "https://github.com/shirakumo/displayer/issues"
-  :source-control (:git "https://github.com/shirakumo/displayer.git")
+  :homepage "https://shirakumo.org/docs/displayer/"
+  :bug-tracker "https://shirakumo.org/project/displayer/issues"
+  :source-control (:git "https://shirakumo.org/project/displayer.git")
   :serial T
   :components ((:file "module")
                (:file "toolkit")
